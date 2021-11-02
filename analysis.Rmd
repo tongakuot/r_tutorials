@@ -1,0 +1,95 @@
+---
+title: "Data Wrangling with dplyr"
+author: "Alier Reng"
+date: "11/1/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE)
+
+library(tidyverse)
+library(vroom)
+library(skimr)
+```
+
+## Import Data
+
+```{r}
+ss_data_raw <- vroom("00_Data/ss_2008_census_data_raw.csv",
+                     show_col_types = FALSE)
+```
+
+```{r}
+# Inspect the first 5 rows
+ss_data_raw %>% slice_head(n = 5)
+```
+```{r}
+head(ss_data_raw)
+```
+```{r}
+ss_data_raw %>% slice_tail(n = 5)
+```
+```{r}
+ss_data_raw %>% skim()
+```
+## Delete the rows with missing values
+```{r}
+ss_data_tbl <- 
+  
+  ss_data_raw %>% 
+  
+  filter(!is.na(`2008`)) %>% 
+  
+  select(ends_with("Name"), `2008`) %>% 
+  
+  set_names("State", "Gender", "Age Category", "Population") %>% 
+  
+  # Separate the gender into two columns
+  separate(Gender,
+           into = c("other", "Gender"), 
+           sep  = " ") %>% 
+  select(-other) %>% 
+  
+  filter(Gender != "Total",
+         `Age Category` != "Total") %>% 
+  
+  mutate(`Age Category` = case_when(
+    `Age Category` %in% c("0 to 4", "5 to 9")     ~ "0-9",
+    `Age Category` %in% c("10 to 14", "15 to 19") ~ "10-19",
+    `Age Category` %in% c("20 to 24", "25 to 29") ~ "20-29",
+    `Age Category` %in% c("30 to 34", "35 to 39") ~ "30-39",
+    `Age Category` %in% c("40 to 44", "45 to 49") ~ "40-49",
+    `Age Category` %in% c("50 to 54", "55 to 59", "60 to 64") ~ "50-64",
+    TRUE ~ "65+"
+  )) %>% 
+  
+  group_by(State, Gender, `Age Category`) %>% 
+  summarize(population = sum(Population, na.rm = TRUE),
+            .groups    = "drop")
+
+ss_data_tbl %>% slice_head(n = 5)
+```
+## Compute state totals
+```{r}
+state_tbl <- 
+  ss_data_tbl %>% 
+  group_by(State) %>% 
+  summarize(population = sum(population),
+            .groups    = "drop") %>% 
+  arrange(desc(population))
+```
+
+```{r}
+state_by_gender <- 
+  ss_data_tbl %>% 
+  group_by(State, Gender) %>% 
+  summarize(population = sum(population),
+            .groups    = "drop")
+```
+
+
+

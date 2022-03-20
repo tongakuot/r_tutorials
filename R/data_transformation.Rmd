@@ -1,0 +1,124 @@
+---
+title: "Data Transformation with dplyr"
+author: "Alier Reng"
+date: '2022-03-19'
+output: html_document
+---
+
+## Loading the Libraries
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE)
+
+# Loading the Libraries
+library(tidyverse)
+library(readxl)
+```
+
+## Importing the Data
+
+```{r}
+# Importing the Data
+path <- "../00_data/raw/multiple_sheets.xlsx"
+
+ss_2008_census_raw <- path %>% 
+  
+  excel_sheets() %>% 
+  set_names() %>% 
+  map_df(read_excel, path = path, .id = "file name")
+```
+
+## Transforming the Data
+
+```{r}
+# Inspect the first rows
+# head(ss_2008_census_raw)
+slice_head(ss_2008_census_raw, n = 5)
+```
+
+```{r}
+# Inspect the last 10 rows
+# tail(ss_2008_census_raw)
+slice_tail(ss_2008_census_raw, n = 10)
+```
+
+## Performing a Quick Summary
+
+```{r}
+aa <- ss_2008_census_raw %>% 
+  skimr::skim()
+
+aa
+```
+
+```{r}
+ss_2008_census_tbl <- ss_2008_census_raw %>% 
+  
+  # Select Columns of Interest
+  select(`Former Region`, ends_with("name"), `2008`)
+  
+```
+
+```{r}
+ss_2008_census_tbl <- ss_2008_census_raw %>% 
+  
+  # Select Desired Columns
+  select(`Former Region`, contains("name"), population = `2008`)
+```
+
+```{r}
+ss_2008_census_tbl <- ss_2008_census_raw %>% 
+  
+  # Select Columns of Interest
+  select(2, 4, 7, 9, 12) %>% 
+  
+  # Rename the Columns
+  # rename(population = `2008`)
+  set_names("former region", "state", 
+            "pop. category", "age category", 
+            "population") %>% 
+  
+  # Fill in Blank Cells or NAS
+  fill(`former region`,
+       .direction = "down") %>% 
+  
+  # Modify the Pop Category
+  separate(
+    `pop. category`, 
+    into = c("pop", "gender", "other"),
+    sep = " "
+  ) %>% 
+  
+  # Remove the Extra Columns
+  select(-c(pop,other)) %>% 
+  
+  # Modify age category column
+  mutate(
+    `age category` = case_when(
+      `age category` %in% c("0 to 4",  "5 to 9", "10 to 14")   ~ "0-14",
+      `age category`  %in% c("15 to 19", "20 to 24")           ~ "15-24",
+      `age category` %in% c("25 to 29", "30 to 34")            ~ "25-34", 
+      `age category` %in% c("35 to 39", "40 to 44")            ~ "35-44",
+      `age category` %in% c("45 to 49", "50 to 54")            ~ "45-54",
+      `age category` %in% c("55 to 59", "60 to 64")            ~ "55-64",
+      `age category` %in% c("65+")                             ~ "65+",
+      TRUE ~ `age category`)
+  ) %>% 
+  
+  # Remove Unwanted Rows
+  filter(
+    gender != "Total",
+    `age category` != "Total"
+  ) %>% 
+  
+  # Summarization and Group
+  group_by(across(`former region`:`age category`)) %>% 
+  summarize(
+    population = sum(population),
+    .groups    = "drop"
+  )
+```
+

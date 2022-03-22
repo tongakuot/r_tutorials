@@ -183,7 +183,6 @@ tweak_ss_2008_census_data <- function(data, filter_var,
     
 }
   
-  
 ```
 
 ```{r}
@@ -196,5 +195,96 @@ test_data <- ss_2008_census_raw %>%
     `Former Region`, `Region Name`, `Variable Name`, `Age Name`,`2008`
     
   )
+
+write_rds(test_data, "../00_data/wrangled/ss_census_data.tbl.rds")
+```
+
+## Tabulate South Sudan 2008 Census Data
+
+```{r}
+library(gt)
+
+ss_census_gt <- 
+  
+  ss_2008_census_tbl %>% 
+  
+  # Modify Column Names
+  janitor::clean_names() %>% 
+  
+  arrange(former_region) %>% 
+  
+  # Summarization and Group by
+  group_by(former_region, state) %>% 
+  summarize(
+    total   = sum(population),
+    .groups = "drop"
+  ) %>% 
+  
+  # Initialize a gt Table
+  gt(rowname_col = "former_region") %>% 
+  
+  # Formatting
+  cols_align(
+    columns = total,
+    align   = "center"
+  ) %>% 
+  
+  fmt_number(
+    columns = total,
+    sep_mark = ",",
+    decimals = 0,
+  ) %>% 
+  tab_row_group(
+    label = "Bahr el Ghazal",
+    rows  = 1:4
+  ) %>% 
+  
+  tab_row_group(
+    label = "Equatoria",
+    rows = 5:7
+  ) %>% 
+  
+  tab_row_group(
+    label = "Upper Nile",
+    rows = 8:10
+  ) %>% 
+  
+  # Add the Border Line
+  tab_style(
+    style = list(
+      cell_borders(sides = "left", color = "darkgrey", weight = px(0.5))
+    ),
+    locations = cells_body(
+      columns = total
+    )
+  ) %>% 
+  
+  # Modify Column Names
+  tab_style(
+    style = list(
+      cell_text(transform = "capitalize")
+    ),
+    
+    locations = cells_column_labels(everything())
+  ) %>% 
+  # Add the Title
+  tab_header(
+    title = "South Sudan 2008 Census Data by State"
+  ) %>% 
+  
+  tab_options(heading.background.color = "grey"
+  ) %>% 
+  
+  # Calculate Total Population
+  grand_summary_rows(
+    columns = total,
+    fns = list(Total = ~ sum(.)),
+    formatter = fmt_integer
+  )
+
+ss_census_gt
+
+# Save the table
+gtsave(ss_census_gt, "../00_images/ss_census_gt.html")
 ```
 

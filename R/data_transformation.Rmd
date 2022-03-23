@@ -126,7 +126,7 @@ ss_2008_census_tbl <- ss_2008_census_raw %>%
 ## Converting our Scripts into a Function
 
 ```{r}
-tweak_ss_2008_census_data <- function(data, filter_var,
+tweak_ss_census_data <- function(data, filter_var,
                                       group_var, pop_var, ...) {
   
   ss_census_tbl <- data %>% 
@@ -183,6 +183,7 @@ tweak_ss_2008_census_data <- function(data, filter_var,
     
 }
   
+# dump("tweak_ss_census_data", "../R/data_transformation_functions.R")
 ```
 
 ```{r}

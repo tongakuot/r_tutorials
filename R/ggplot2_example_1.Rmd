@@ -56,11 +56,7 @@ g <- ss_census_tbl %>%
   geom_col() +
   
   # Formatting
-<<<<<<< HEAD
   theme_hc() +
-=======
-  theme_tufte() +
->>>>>>> 2ddfc10cf877e4a948409369001e49029ba2e9a3
   scale_fill_hc() +
   scale_y_continuous(labels = scales::number_format(scale = 1e-6, suffix = "M")) +
   expand_limits(y = c(0, 1500000)) +

@@ -1,0 +1,80 @@
+---
+title: "Untitled"
+author: "Alier Reng"
+date: '2022-03-23'
+output: html_document
+---
+
+## Loading the Libraries
+
+We will just load `tidyverse` and `readxl` packages.
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE
+  )
+
+# Libraries
+library(tidyverse)
+library(readxl)
+library(ggthemes)
+```
+
+## Importing the Data
+
+```{r}
+ss_census_raw <- read_xlsx("../00_data/raw/ss_2008_census_data_1.xlsx")
+
+# Subset the Data
+ss_census_tbl <- ss_census_raw %>% 
+  
+  tweak_ss_census_data(
+    filter_var = "Total", 
+    group_var  = c(state, gender), 
+    pop_var    = population, 
+    `Former Region`, `Region Name`, `Variable Name`, `Age Name`, `2008`
+  )
+```
+
+## Plotting the Data
+
+```{r}
+g <- ss_census_tbl %>% 
+  
+  # Format x-axis text to wrap around; order the data in descending rrder
+  mutate(
+    state = str_wrap(state, width = 15),
+    state = state %>% fct_reorder(total, .desc = TRUE)
+  ) %>% 
+  
+  # Initialize the Canvas
+  ggplot(aes(state, total, fill = gender)) +
+  
+  # Geometries
+  geom_col() +
+  
+  # Formatting
+  theme_tufte() +
+  scale_fill_hc() +
+  scale_y_continuous(labels = scales::number_format(scale = 1e-6, suffix = "M")) +
+  expand_limits(y = c(0, 1500000)) +
+  labs(
+    title = "South Sudan 2008 Census Data by State and Gender",
+    x     = NULL,
+    y     = NULL
+  ) +
+  theme(
+    plot.title      = element_text(hjust = 0.5),
+    axis.text.x     = element_text(angle = 30, hjust = 1),
+    legend.position = "top"
+  )
+
+
+g
+
+# Save the plot
+ggsave("ss_census.png", width = 12, height = 8)
+```
+

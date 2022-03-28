@@ -1,0 +1,81 @@
+---
+title: "Saving Data in R"
+author: "Alier Reng"
+date: '2022-03-27'
+output: html_document
+---
+
+## Saving Data in R
+
+### Loading the Libraries
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo    = TRUE,
+  message = FALSE,
+  warning = FALSE)
+
+# Libraries
+library(tidyverse)
+library(vroom)
+library(writexl)
+library(readxl)
+```
+
+### Importing the Data
+
+```{r}
+path <- "../00_data/raw/multiple_sheets.xlsx"
+
+ss_census_raw <- path %>% 
+  
+  excel_sheets() %>% 
+  set_names() %>% 
+  map_df(read_excel, path = path, .id = "file name")
+
+ss_census_raw
+```
+
+### Transforming the Data
+
+```{r}
+source("data_transformation_functions.R")
+
+ ss_census_tbl <- 
+   
+   ss_census_raw %>% 
+   
+   tweak_ss_census_data(
+     filter_var = "Total", 
+     group_var  = c(`former region`, state, gender, `age category`), 
+     pop_var    = population, 
+     `Former Region`, `Region Name`, `Variable Name`,  `Age Name`, `2008`)
+```
+
+### Saving the Data
+
+```{r}
+# Readr package
+
+ss_census_tbl %>% write_csv("../00_data/wrangled/ss_census_data_tbl.csv")
+
+# RDS
+ss_census_tbl %>% write_rds("../00_data/wrangled/ss_census_data_tbl.rds")
+
+
+```
+
+#### Saving the Data with the `vroom` package
+
+```{r}
+# vroom
+
+ss_census_tbl %>% vroom_write("../00_data/wrangled/ss_census_data_vr.csv", delim = ",")
+```
+
+#### Saving the Data with `writexl` package
+
+```{r}
+# writexl
+ss_census_tbl %>% writexl::write_xlsx("../00_data/wrangled/ss_census_data_tbl.xlsx")
+```

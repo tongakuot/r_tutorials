@@ -1,0 +1,117 @@
+---
+title: "Importing Multiple Excel Files in R"
+author: "Alier Reng"
+date: '2022-02-27'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+    echo    = TRUE,
+    message = FALSE,
+    warning = FALSE)
+
+# Load libraries
+library(tidyverse)
+```
+
+```{r}
+ss_2008_census_gbg <- readxl::read_xlsx('../00_data/raw/ss_2008_census_data_1.xlsx') %>% 
+    
+    # Fill NAs downward
+    fill( `Former Region`, .direction = 'down') %>% 
+    
+    # Split the data by the former regions
+    mutate(`Former Region` = as_factor(`Former Region`)) %>% 
+    group_split(
+       `Former Region`
+    ) %>% 
+    
+    # Pull out a single list at a time
+    pluck(3)
+
+library(openxlsx)
+
+# Create a blank workbook
+ss_2008_census_data_tbl <- createWorkbook()
+
+# Add some sheets to the workbook
+addWorksheet(ss_2008_census_data_tbl, "Greater Equatoria")
+addWorksheet(ss_2008_census_data_tbl, "Greater Bahr el Ghazal")
+addWorksheet(ss_2008_census_data_tbl, "Greater Upper Nile")
+
+# Write the data to the sheets
+writeData(ss_2008_census_data_tbl, 
+          sheet = 'Greater Bahr el Ghazal', 
+          x     = ss_2008_census_gbg)
+
+writeData(ss_2008_census_data_tbl, 
+          sheet = "Greater Equatoria", 
+          x     = ss_2008_census_ge)
+
+writeData(ss_2008_census_data_tbl, 
+          sheet = "Greater Upper Nile", 
+          x     = ss_2008_census_gun)
+
+# Export the file
+saveWorkbook(ss_2008_census_data_tbl, 
+             "00_data/raw/mult_sheets/ss_2008_census_data_tbl.xlsx"
+        )
+```
+
+```{r}
+library(writexl)
+
+# Create a list of data frames
+sheets <- list("Lakes State"             = lakes, 
+               "Unity"                   = unity,
+               "Jonglei"                 = jonglei,
+               "Upper Nile"              = upper_nile,
+               "Warrap"                  = warrap,
+               "Central Equatoria"       = central_equatoria,
+               "Eastern Equatoria"       = eastern_equatoria,
+               "Western Equatoria"       = western_equatoria,
+               "Western Bahr el Ghazal"  = western_bahr_el_ghazal,
+               "Northern Bahr el Ghazal" = northern_bahr_el_ghazal
+               ) 
+
+# Save data an Excel file
+write_xlsx(sheets, "00_data/raw/mult_sheets.xlsx")
+```
+
+# Importing multiple Excel Files
+
+```{r}
+library(readxl)
+paths <- fs::dir_ls('../00_data/raw/mult_files/') 
+
+multiple_excel_files = tibble()
+
+for (file in paths) {
+    
+    multiple_excel <- readxl::read_xlsx(file, ) %>% 
+        
+        select(`Former Region`, `Region Name`, `Variable Name`, `Age Name`, `2008`)
+    
+multiple_excel_files <- bind_rows(multiple_excel_files, multiple_excel)
+    
+}
+
+multiple_excel_purrr <- paths %>% 
+    
+    set_names() %>% 
+    map_df(readxl::read_xlsx, .id = 'some name')
+```
+
+# Importing multiple Excel Sheets
+
+```{r}
+excel_sheets_paths <- '../00_data/raw/multiple_sheets.xlsx'
+
+multiple_excel_files <- excel_sheets_paths %>% 
+    
+    excel_sheets() %>% 
+    set_names() %>%
+    map_df(readxl::read_xlsx, path = excel_sheets_paths, .id = "file_name")
+```
+

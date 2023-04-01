@@ -1,0 +1,46 @@
+---
+title: "Quarto Tutorial 4 - R"
+author: "Alier Reng"
+date: "05/02/2022"
+date-format: full
+format: 
+   html:
+    smooth-scroll: true
+    toc: true
+    code-fold: true
+    code-overflow: wrap
+    fig-align: "center"
+    
+editor: visual
+---
+
+## Introduction
+
+I recently shared tutorials on using `Quarto`, *the next generation of `RMarkdown`,* and `Murtada Khalafall` asked me to do a `Quarto` tutorial with `R`.
+So, this tutorial is the `R` version of my previous `Quarto` tutorial 3.
+`yaml` options are the same for both `R` and `Python`, except that the `jupyter` is set to *`Python`* *(jupyter: python3)* when using `Python` for data analysis.
+
+![Quarto yaml when using Python](images/quarto_yaml_python.png)
+
+## Quarto
+
+> Quarto enables you to weave together content and executable code into a finished document.
+> To learn more about Quarto see <https://quarto.org>.
+
+```{python}
+from math import pi, e
+
+print(f'pi, rounded to 3 decimal places, is {pi:.3f}.')
+print(f'e, rounded to 3 decimal places, is {e:3f}.')
+
+
+```
+
+```{python}
+print(f'Alier Reng \ 630 St. Andrews Dr \Apt. H204 \Murfreesboro, TN 37128 USA')
+```
+
+```{r}
+
+
+```

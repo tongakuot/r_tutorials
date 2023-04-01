@@ -1,0 +1,296 @@
+---
+title: "How to Import Multiple Excel Sheets and Files into R Using the purrr Package"
+author: Alier Reng
+date: "04-01-2023"
+format: html
+editor: visual
+---
+
+## **Motivation**
+
+As the volume of data being generated continues to grow exponentially, analyzing and processing this data has become increasingly important.
+One common task in data analysis is importing data from Excel spreadsheets into R.
+However, when working with large datasets that are spread across multiple sheets, the process of importing data can be time-consuming and tedious.
+This is where the purrr package comes in, offering a more efficient and streamlined approach to importing data from multiple sheets.
+In this article, we will explore how to use the purrr package to import multiple Excel sheets into R, saving time and increasing productivity in the data analysis process.
+
+### Importing multiple Excel Files
+
+1.0 Using a for loop
+
+In this code, the **`readxl`** library is loaded, and the files in the specified directory are listed using **`fs::dir_ls`**.
+An empty tibble, **`multiple_excel_files`**, is initialized to store the data from multiple Excel files.
+Then, a for loop iterates through each file in the **`paths`** vector.
+Within the loop, data is read from the current Excel file using **`read_xlsx`**, and specific columns are selected using **`select`**.
+Finally, the data from the current file is appended to the main data frame **`multiple_excel_files`** using **`bind_rows`**.
+
+```{r}
+#| warning: false
+#| message: false
+
+
+# Load necessary library
+library(readxl)
+library(tidyverse)
+
+# List all files in the specified directory
+paths <- fs::dir_ls("../../00-input/mult_files/") 
+
+# Initialize an empty tibble to store data from multiple Excel files
+multiple_excel_files <- tibble()
+
+# Loop through each file in the paths vector
+for (file in paths) {
+    
+    # Read data from the current Excel file and select specific columns
+    multiple_excel <- readxl::read_xlsx(file) %>% 
+        select(
+          former_region = `Former Region`, 
+          state = `Region Name`, 
+          gender = `Variable Name`, 
+          age_category = `Age Name`, 
+          population = `2008`
+          )
+    
+    # Append the data from the current file to the main data frame
+    multiple_excel_files <- bind_rows(multiple_excel_files, multiple_excel)
+    
+}
+```
+
+In this code, the **`paths`** vector is first piped into **`set_names()`** to set the file names as data frame names.
+Then, the **`map_df`** function from the **`purrr`** package is used to read each Excel file using the **`read_xlsx`** function from the **`readxl`** package.
+The resulting data frames are combined into a single data frame named **`multiple_excel_purrr`**.
+The **`.id`** parameter adds a new column with the given name ('some name') to the final data frame, which contains the data frame name (source file name) for each row.
+
+### 2.0 Using the `purrr` Package
+
+```{r}
+# Read and process data from multiple Excel files using purrr
+
+# Apply set_names to the paths vector to set the file names as data frame names
+# Use map_df to read each Excel file and combine them into a single data frame
+# The .id parameter adds a new column with the given name ('some name') containing the data frame name (source file name)
+multiple_excel_purrr <- 
+  
+  paths |>  
+  
+  # Set file names as data frame names
+  set_names() |> 
+  
+  # Read each Excel file
+  map_df(
+    readxl::read_xlsx,
+    # Add a new column with the data frame name (source file name)
+    .id = 'id'
+  )
+
+```
+
+### 2.1 Converting `purrr` code into a function for processing state census data
+
+```{r}
+# List all files in the specified directory
+paths <- fs::dir_ls("../../00-input/mult_files/") 
+source("ss_census_box.R")
+
+# # Function to read and select specific columns from an Excel file
+# read_multiple_excel_sheets <- function(file) {
+#   
+#   read_xlsx(file) |> 
+#     select(
+#       `Former Region`, 
+#       `Region Name`, 
+#       `Variable Name`, 
+#       `Age Name`, `2008`
+#     )
+# }
+
+# Read data from multiple Excel files using map and bind_rows
+multiple_excel_files_2 <- 
+  
+  paths |> 
+  map_df(read_multiple_excel_sheets)
+```
+
+### **Importing and Cleaning Data from Excel File**
+
+#### 3.0 Using a for loop
+
+This code chunk reads data from an Excel file with multiple sheets, processes it, and combines it into a single data frame using a **`for`** loop:
+
+```{r}
+# Set the path of the files
+path <- "../../00-input/multiple_sheets.xlsx"
+
+# Get sheet names
+sheets <- excel_sheets(path)
+
+# Initialize an empty data frame
+census_4_loop <- tibble()
+
+# Loop through the sheet names
+for (sheet in sheets) {
+  
+  # Read the current sheet
+  current_sheet <- 
+    
+    read_excel(
+      path, 
+      sheet = sheet
+    ) |> 
+    
+    # Clean column names
+    janitor::clean_names() |> 
+    
+    # Select columns of interest
+    select(
+      former_region, 
+      state = region_name, 
+      gender = variable_name, 
+      age_category = age_name,
+      population = x2008
+    ) |> 
+    
+    # Fill in missing values
+    fill(former_region, .direction = "down") |> 
+    
+    # Clean gender values
+    mutate(
+      gender = str_remove_all(gender, "Population, | \\(Number\\)")
+    ) |> 
+    
+    # Remove unwanted rows
+    filter(
+      gender != "Total",
+      age_category != "Total"
+    )
+  
+  # Combine the current sheet with the main data frame
+  census_4_loop <- bind_rows(census_4_loop, current_sheet)
+}
+
+```
+
+#### 3.1 Using the `purrr` Package
+
+Importing and cleaning data from an Excel file can be a time-consuming and error-prone task, but R packages like readxl, purrr, janitor, dplyr, and tidyr can help to streamline the process.
+The following steps outline how to import and clean data from an Excel file using these packages:
+
+1.  Set the file path for the Excel file.
+
+2.  Use excel_sheets() function from the readxl package to read the sheet names from the Excel file and return them as a character vector.
+
+3.  Set the names of the resulting list to the sheet names using the set_names() function from the purrr package.
+
+4.  Use the map_df() function from the purrr package to iterate over each sheet in the list and read it into a data frame.
+    This function applies a function to each element of a list and returns a data frame.
+
+5.  Use the .id parameter in map_df() to add a column with the sheet name to the resulting data frame.
+
+6.  Clean the column names using the clean_names() function from the janitor package.
+    This function removes special characters and converts column names to snake_case.
+
+7.  Select the columns of interest using the select() function from the dplyr package.
+
+8.  Fill in missing values for the former_region column using the fill() function from the tidyr package.
+
+9.  Modify the gender column using the mutate() function from the dplyr package.
+
+10. Remove unwanted rows using the filter() function from the dplyr package.
+
+11. Modify the age_category column using the mutate() function from the dplyr package.
+
+12. Summarize the data using the summarize() function from the dplyr package.
+
+It\'s important to note that during the data cleaning process, errors or issues may arise, such as missing data or unexpected values.
+In such cases, it\'s important to be familiar with various data manipulation functions and tools in R and to know how to handle these issues appropriately.
+
+```{r}
+# Set the path of the files and read the data with a map
+file_path = "../../00-input/multiple_sheets.xlsx"
+
+ss_census <- 
+  
+  # Read in the data with map_df
+  file_path |> 
+  excel_sheets() |> 
+  set_names() |> 
+  map_df(
+    read_excel, 
+    path = file_path, 
+    .id = "state"
+  ) |> 
+  
+  # Clean column names
+  janitor::clean_names() |> 
+  
+  # Select columns of interest
+  select(
+    former_region, 
+    state, 
+    gender = variable_name, 
+    age_category = age_name,
+    population = x2008
+  ) |> 
+  
+  # Fill in nas
+  fill(former_region, .direction = "down") |> 
+  
+  # Clean gender values
+  mutate(gender = str_remove_all(gender, "Population, | \\(Number\\)")) |> 
+  
+  # Remove unwanted rows
+  filter(
+    gender != "Total",
+    age_category != "Total"
+  )
+```
+
+#### Alternative Approach 
+
+```{r}
+# Set the path of the files and read the data with a map
+path = "../../00-input/multiple_sheets.xlsx"
+
+df <- path |> 
+  
+  excel_sheets() |>
+  map(read_excel, path = path) |> 
+  bind_rows() |> 
+  
+  # Clean column names
+  janitor::clean_names() |> 
+  
+  # Select columns of interest
+  select(
+    former_region, 
+    state = region_name, 
+    gender = variable_name, 
+    age_category = age_name,
+    population = x2008
+  ) |> 
+  
+  # Fill in nas
+  fill(former_region, .direction = "down") |> 
+  
+  # Clean gender values
+  mutate(gender = str_remove_all(gender, "Population, | \\(Number\\)")) |> 
+  
+  # Remove unwanted rows
+  filter(
+    gender != "Total",
+    age_category != "Total"
+  ) 
+```
+
+### Conclusion
+
+This tutorial successfully demonstrates the process of reading, processing, and aggregating data from an Excel file with multiple sheets using R.
+By utilizing various R packages, such as **`readxl`**, **`dplyr`**, **`janitor`**, and **`tidyr`**, the code efficiently handles different aspects of data cleaning and transformation.
+Additionally, both **`purrr`** and **`for`** loop approaches were presented to showcase alternative methods for handling data from multiple sheets.
+
+Through this tutorial, we have shown that R provides a powerful and flexible environment for handling and processing data from complex sources, such as Excel files with multiple sheets.
+The resulting clean and aggregated data can be further used for in-depth analysis, visualization, or reporting purposes, depending on the project's requirements and goals.
+We hope you'll find this helpful.
+Happy Coding!

@@ -34,7 +34,7 @@ library(readxl)
 library(tidyverse)
 
 # List all files in the specified directory
-paths <- fs::dir_ls("../../00-input/mult_files/") 
+paths <- fs::dir_ls("../00-input/multiple_files/") 
 
 # Initialize an empty tibble to store data from multiple Excel files
 multiple_excel_files <- tibble()
@@ -91,7 +91,7 @@ multiple_excel_purrr <-
 
 ```{r}
 # List all files in the specified directory
-paths <- fs::dir_ls("../../00-input/mult_files/") 
+paths <- fs::dir_ls("../00-input/multiple_files/") 
 source("ss_census_box.R")
 
 # # Function to read and select specific columns from an Excel file
@@ -121,7 +121,7 @@ This code chunk reads data from an Excel file with multiple sheets, processes it
 
 ```{r}
 # Set the path of the files
-path <- "../../00-input/multiple_sheets.xlsx"
+path <- "../00-input/multiple_sheets.xlsx"
 
 # Get sheet names
 sheets <- excel_sheets(path)
@@ -203,12 +203,12 @@ The following steps outline how to import and clean data from an Excel file usin
 
 12. Summarize the data using the summarize() function from the dplyr package.
 
-It\'s important to note that during the data cleaning process, errors or issues may arise, such as missing data or unexpected values.
-In such cases, it\'s important to be familiar with various data manipulation functions and tools in R and to know how to handle these issues appropriately.
+It's important to note that during the data cleaning process, errors or issues may arise, such as missing data or unexpected values.
+In such cases, it's important to be familiar with various data manipulation functions and tools in R and to know how to handle these issues appropriately.
 
 ```{r}
 # Set the path of the files and read the data with a map
-file_path = "../../00-input/multiple_sheets.xlsx"
+file_path = "../00-input/multiple_sheets.xlsx"
 
 ss_census <- 
   
@@ -247,11 +247,11 @@ ss_census <-
   )
 ```
 
-#### Alternative Approach 
+#### Alternative Approach
 
 ```{r}
 # Set the path of the files and read the data with a map
-path = "../../00-input/multiple_sheets.xlsx"
+path = "../00-input/multiple_sheets.xlsx"
 
 df <- path |> 
   

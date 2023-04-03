@@ -1,13 +1,15 @@
 # R Tutorials: Master Data Science with R and the Tidyverse
 
+<<<<<<< HEAD
 R Tutorials is a repository dedicated to sharing data science resources and tutorials using R, specifically focusing on the {tidyverse} ecosystem. This repo is perfect for those looking to learn R programming for the first time or enhance their existing R skills. Join us to explore the power of {tidyverse} and elevate your data science journey with R!
 
+=======
+![Jonglei Institute of Technology](00-images/contact-page.png)
+>>>>>>> 91e5373 (updated files)
 
 Welcome to the R Tutorials GitHub repository!
 This is your go-to resource for learning and mastering data science using the R programming language, with a primary focus on the Tidyverse collection of packages.
 This repository is designed for beginners taking their first steps into R programming and experienced users who want to enhance their R programming skills.
-
-![Jonglei Institute of Technology](images/contact-page.png)
 
 ## **Repository Overview**
 
@@ -71,4 +73,4 @@ If you have any questions, suggestions, or feedback, please feel free to reach o
 -   [**Email**](mailto:info@jongleiinstitute.com)
 
 Happy learning, and enjoy your journey toward becoming an R and data science expert!
->>>>>>> 49741b6 (updated tutorials repo)
+\>\>\>\>\>\>\> 49741b6 (updated tutorials repo)

@@ -27,11 +27,158 @@ hospital <-
   vroom::vroom(
     "00-input/hospital_general_info_dataset.csv",
     show_col_types = FALSE
-    )
+    ) |> 
+  
+  # Clean column names
+  janitor::clean_names() 
 ```
 
 ### Select Columns of Interest
 
+-   select
+
+-   selections-helpers: contains, starts_with, ends_with
+
+```{r}
+# Selecting columns using index
+hospital_tbl <- hospital |> 
+  
+  # select(-c(1, 3, 4))
+  select(
+    -c(facility_id, address, city)
+  )
+```
+
+```{r}
+hosp <- hospital |> 
+  select(
+    -facility_id,
+    -address,
+    -city,
+    -zip_code,
+    -location,
+    -ends_with("footnote"),
+    -contains("eh_rs"),
+    -starts_with("phone"),
+    -contains("county")
+  )
+```
+
+### Import dataset
+
+```{r}
+raw <- 
+  
+  read_csv(
+    "00-input/ss_2008_census_data_raw.csv",
+    show_col_types = FALSE, 
+    ) |> 
+  janitor::clean_names()
+```
+
+```{r}
+# Insepct the first few rows
+# head(raw)
+slice_head(raw, n = 5)
+```
+
+```{r}
+# Inspect the last 5 rows
+# tail(raw)
+raw |> slice_tail(n = 5)
+```
+
+### Select columns of interest
+
+```{r}
+census <- 
+  
+  raw |> 
+  filter(!is.na(x2008)) |> 
+  select(
+    state = region_name,
+    gender = variable_name,
+    age_category = age_name,
+    population = x2008
+  ) |> 
+  
+  # separate(
+  #   gender,
+  #   into = c("a", "gender", "b"),
+  #   sep = " "
+  # ) |> 
+  # 
+  # select(
+  #   -c(a, b)
+  # )
+  mutate(
+    gender = str_remove_all(gender, "Population, | \\(Number\\)"),
+    # gender = str_trim(gender, "both")
+  )
+```
+
 ### Filter the Data - Remove unwanted data rows
 
+```{r}
+census_2 <- census |> 
+  
+  # filter(
+  #   !(gender == "Total" | age_category == "Total")
+  # )
+  filter(
+    gender != "Total", age_category != "Total"
+  ) |> 
+  
+  mutate(
+    age_category = case_when(
+      str_detect(
+        age_category, "0 to 4|5 to 9|10 to 14"
+        ) ~ "0-14",
+      str_detect(age_category, "15 to 19|20 to 24|25 to 29") ~ "15-29",
+      str_detect(age_category, "30 to 34|35 to 39|40 to 44|45 to 49") ~ "30-49",
+      str_detect(age_category, "50 to 54|55 to 59|60 to 64") ~ "50-64",
+      TRUE ~ "65 and above"
+      
+    )
+  )
+```
+
 ### Grouping and Summarization
+
+```{r}
+state <- census_2 |> 
+  group_by(state) |> 
+  summarize(
+    population = sum(population, na.rm = TRUE), .groups = "drop"
+ )
+
+# dplyr 1.1.0
+state_2 <- census_2 |> 
+  summarize(
+    total = sum(population),
+    .by = state
+  )
+```
+
+```{r}
+state_by_gender_by_age <- 
+  
+  census_2 |> 
+  summarize(
+    total = sum(population),
+    .by = c(state, gender, age_category)
+  )
+```
+
+```{r}
+df <- raw |> 
+  
+  mutate(
+    region_name = str_to_lower(region_name),
+    former_region = case_when(
+      str_detect(region_name, "nile|jonglei|unity") ~ "greater upper nile",
+      str_detect(region_name, "equatoria") ~ "greater equatoria",
+      TRUE ~ "greater bahr el ghazal"),
+    .before = region_name
+  )
+```

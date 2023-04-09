@@ -1,0 +1,37 @@
+---
+title: "Mastering Data Cleaning and Transformation with dplyr: A Comprehensive Guide"
+author: "Alier Reng"
+format: html
+editor: visual
+---
+
+## Data Cleaning and Transformation
+
+### Load the Libraries
+
+```{r}
+#| warning: false
+#| message: false
+
+# Libraries
+library(tidyverse)
+```
+
+### Import the Datasets
+
+```{r}
+# Import data
+hospital <- 
+  
+  # Reading in the data
+  vroom::vroom(
+    "00-input/hospital_general_info_dataset.csv",
+    show_col_types = FALSE
+    )
+```
+
+### Select Columns of Interest
+
+### Filter the Data - Remove unwanted data rows
+
+### Grouping and Summarization

@@ -22,8 +22,110 @@ This tutorial demonstrates how to incorporate the box R package into your data s
 >     ([The Box R Package](https://morioh.com/p/9a313401f051))
 
 2.  Loading the Package
-3.  Importing the Dataset
-4.  Cleaning and Transforming the Data
-5.  Writing a Function
-6.  Demonstrating How the Function Works
-7.  Conclusion
+
+    option + command + i
+
+```{r}
+#| warning: false
+#| message: false
+
+# Libraries
+# library(tidyverse)
+box::use(
+  dplyr[...], 
+  purrr[map_df], 
+  tidyr[...], 
+  stringr[str_remove_all],
+  readxl[read_excel, read_xlsx]
+)
+
+```
+
+2.  Importing the Dataset
+
+```{r}
+# Importing the dataset
+file_path <- fs::dir_ls("../00-input/excel_files/")
+
+census <- file_path |>
+  
+  # map_df(read_xlsx)
+  # map_df(file_path, ~read_excel(.x))
+  map_df(\(path) read_xlsx(path)) |> 
+  
+  # Select columns of interest
+  janitor::clean_names() |> 
+  select(
+    former_region, 
+    state = region_name,
+    gender = variable_name,
+    age_category = age_name,
+    population = x2008
+  ) |>
+  
+  fill(
+    former_region, .direction = "down"
+  ) |> 
+  
+  # Transform column values
+  mutate(
+    gender = str_remove_all(gender, "Population, | \\(Number\\)")
+  ) |> 
+  
+  # Remove unwanted rows
+  filter(
+    !(gender == "Total" | age_category == "Total")
+    # gender != "Total", age_category != "Total"
+  ) |> 
+  
+  mutate(
+    age_category = case_when(
+      str_detect(age_category, "0 to 4|5 to 9|10 to 14") ~ "0-14",
+      str_detect(age_category, "15 to 19|20 to 24|25 to 29") ~ "15-29",
+      str_detect(age_category, "30 to 34|35 to 39|40 to 44|45 to 49") ~ "30-49",
+      str_detect(age_category, "50 to 54|55 to 59|60 to 64") ~ "50-64",
+      TRUE ~ "65+"
+    )
+  ) |> 
+  
+  # Grouping and summarization
+  summarize(
+    total = sum(population),
+    .by = c(former_region, state, gender, age_category)
+  )
+```
+
+2.  Writing a Function
+
+    ```{r}
+    # Source the function
+    box::use(../R/clean)
+
+    file_path <- fs::dir_ls("../00-input/excel_files/")
+
+    # Test the function
+    df <- clean$tweak_census(
+      path = file_path, 
+      pattern = "Population, | \\(Number\\)", 
+      condition = !(gender == "Total" | age_category == "Total"),
+      group_var = c(former_region, 
+                    state, gender, 
+                    age_category),
+      c(former_region, 
+        state = region_name, 
+        gender = variable_name, 
+        age_category = age_name, 
+        population = x2008)
+    )
+    ```
+
+3.  Grouping and Summarization
+
+```{r}
+state <- 
+  clean$calc_state_totals(
+    df, group_var = c(state, gender)
+)
+```
+
+2.  Conclusion

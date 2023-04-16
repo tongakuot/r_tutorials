@@ -134,11 +134,17 @@ census_2 <- census |>
       str_detect(
         age_category, "0 to 4|5 to 9|10 to 14"
         ) ~ "0-14",
-      str_detect(age_category, "15 to 19|20 to 24|25 to 29") ~ "15-29",
-      str_detect(age_category, "30 to 34|35 to 39|40 to 44|45 to 49") ~ "30-49",
-      str_detect(age_category, "50 to 54|55 to 59|60 to 64") ~ "50-64",
-      TRUE ~ "65 and above"
+      str_detect(
+        age_category, "15 to 19|20 to 24|25 to 29"
+        ) ~ "15-29",
+      str_detect(
+        age_category, "30 to 34|35 to 39|40 to 44|45 to 49"
+        ) ~ "30-49",
+      str_detect(
+        age_category, "50 to 54|55 to 59|60 to 64"
+        ) ~ "50-64",
       
+      TRUE ~ "65 and above"
     )
   )
 ```

@@ -1,0 +1,29 @@
+---
+title: "Enhance Your Data Science Workflow with the box R Package"
+author: "Alier Reng"
+date: "04/16/2023"
+format: html
+editor: visual
+---
+
+## Tutorial on Utilizing the Box R Package Effectively
+
+This tutorial demonstrates how to incorporate the box R package into your data science workflow effectively 🖥️.
+
+## Outline of this Tutorial
+
+1.  What is box?
+
+> \'box\' allows organising R code in a more modular way, via two mechanisms:
+>
+> 1.  It enables *writing modular code* by treating files and folders of R code as independent (potentially nested) modules, without requiring the user to wrap reusable code into packages.
+>
+> 2.  It provides a new syntax to import reusable code (both from packages and from modules) which is more powerful and less error-prone than **`library`** or **`require`**, by limiting the number of names that are made available.
+>     ([The Box R Package](https://morioh.com/p/9a313401f051))
+
+2.  Loading the Package
+3.  Importing the Dataset
+4.  Cleaning and Transforming the Data
+5.  Writing a Function
+6.  Demonstrating How the Function Works
+7.  Conclusion

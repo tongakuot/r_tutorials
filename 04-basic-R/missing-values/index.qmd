@@ -1,0 +1,40 @@
+---
+title: "Tips for Handling Missing Values"
+author: "Alier Reng"
+format: html
+editor: visual
+---
+
+## Using `coalesce()` from `dplyr` to replace `NAs` with 0
+
+> Some times missing values represent some fixed and known value, most commonly 0.
+> [19.2.2 Fixed values](https://r4ds.hadley.nz/missing-values "dplyr::coalesce()")
+
+```{r}
+#| message: false
+
+library(dplyr)
+# R 4 Data Science (2ed)
+# 19.2.2 Fixed values - using coalesce() from dplyr to replace NAs with 0
+student_grades <- 
+  
+  tribble(
+  ~student, ~english, ~math, ~KiSwahili,
+  "deng", 100, 67,78,
+  "kuol", 94, 99, NA,
+  "Ojuok", NA, 89, 75,
+  "Gatwich", 57, 100, NA,
+  "Ujang", 98, NA, 88
+  )
+
+# Replace NAs with 0
+student_final_grades <-  
+  mutate(
+    student_grades, 
+    # Use anonimous or lambda function
+    across(where(is.numeric), \(x) coalesce(x, 0))
+  )
+
+# Display student final grades
+knitr::kable(student_final_grades)
+```

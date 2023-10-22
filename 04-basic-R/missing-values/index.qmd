@@ -1,11 +1,21 @@
 ---
 title: "Tips for Handling Missing Values"
+subtitle: "Tips from R 4 Data Science, 2nd ed."
 author: "Alier Reng"
-format: html
+date: today
+date-format: full
+format: 
+  pdf:
+    toc: true
+    number-sections: true
+    colorlinks: true
+    
 editor: visual
 ---
 
-## Using `coalesce()` from `dplyr` to replace `NAs` with 0
+\newpage
+
+# Using `coalesce()` from `dplyr` to replace `NAs` with 0
 
 > Some times missing values represent some fixed and known value, most commonly 0.
 > [19.2.2 Fixed values](https://r4ds.hadley.nz/missing-values "dplyr::coalesce()")
@@ -13,13 +23,13 @@ editor: visual
 ```{r}
 #| message: false
 
-library(dplyr)
+library(tidyverse)
 # R 4 Data Science (2ed)
 # 19.2.2 Fixed values - using coalesce() from dplyr to replace NAs with 0
 student_grades <- 
   
   tribble(
-  ~student, ~english, ~math, ~KiSwahili,
+  ~student, ~english, ~math, ~kiswahili,
   "deng", 100, 67,78,
   "kuol", 94, 99, NA,
   "Ojuok", NA, 89, 75,
@@ -38,3 +48,101 @@ student_final_grades <-
 # Display student final grades
 knitr::kable(student_final_grades)
 ```
+
+\newpage
+
+# Extending our Missing Values Example
+
+```{r}
+# Compute totals
+final_grades_with_totals <- 
+  
+  student_final_grades |> 
+  rowwise() |> 
+  mutate(
+    total = sum(c_across(where(is.numeric))),
+    letter_grade = case_when(
+      total / 3 >= 90 ~ "A",
+      total / 3 >= 80 ~ "B",
+      total / 3 >= 70 ~ "C",
+      total / 3 >= 60 ~ "D",
+      TRUE ~ "F"
+    )
+  )
+
+# Display student final grades
+knitr::kable(
+  final_grades_with_totals, align = "c"
+)
+```
+
+\newpage
+
+# Using `complete()` & `fill()` Functions from `tidyr`
+
+Here we are going demonstrate how to use `complete()` and `fill` functions from `tidyr`.
+
+```{r}
+#| message: false
+
+# Load data
+salary <- vroom::vroom("data/salary_data.csv", show_col_types = FALSE)
+
+# Inspect the first 7 rows
+salary |> slice_head(n = 7)
+```
+
+Based on the output provided above, it's evident that the 'Name' column contains missing values (NAs).
+To address this issue, we can use the 'fill()' function from tidyr.
+The 'fill()' function offers a '.direction' option that can be set to 'down', 'up', 'downup', or 'updown' to handle missing values appropriately.
+
+Furthermore, it's worth noting that some employees did receive payments for all 12 months in 2023.
+To account for this, we will utilize the 'complete()' function to fill in the missing months for those employees who did receive their paychecks throughout the year.
+
+```{r}
+salary_tbl <- salary |> 
+  
+  # Transform column names
+  janitor::clean_names() |> 
+  
+  # Fill the missing values downward
+  fill(name, .direction = "down") |> 
+  
+  # Add the missing months
+  complete(name, year, month)
+
+# View updated salary data
+glimpse(salary_tbl)
+```
+
+We now observe a total of 36 rows in the dataset, with each of these rows corresponding to the 12 months for every employee.
+
+## Bonus
+
+Now, let's learn how to remove the dollar symbol '\$' from the salary column using `parse_number` from `dplyr`.
+
+```{r}
+#| warning: false
+#| message: false
+
+# Our cleaned salary column
+clean_salary <- 
+  
+  mutate(
+    salary_tbl,
+    salary = parse_number(salary)
+  ) |> 
+  
+  # spread the data
+  pivot_wider(
+    names_from = month,
+    values_from = salary
+  )
+
+# Display cleaned salary data
+knitr::kable(
+  clean_salary, align = "c"
+)
+```
+
+**Happy Coding!**

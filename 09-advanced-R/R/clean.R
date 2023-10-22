@@ -2,7 +2,7 @@
 
 box::use(
   dplyr[filter, select, mutate, summarize, case_when],
-  purrr[map_df],
+  purrr[map, list_rbind],
   readxl[read_excel, read_xlsx],
   janitor[clean_names],
   stringr[str_detect, str_remove_all],
@@ -16,21 +16,11 @@ tweak_census <- function(path,
                          pattern, 
                          group_var, 
                          ...) {
-  # box::use(
-  #   dplyr[filter, select, mutate, summarize, case_when],
-  #   purrr[map_df],
-  #   readxl[read_excel, read_xlsx],
-  #   janitor[clean_names],
-  #   stringr[str_detect, str_remove_all],
-  #   tidyr[fill]
-  # )
-  
+
   census <- path |>
     
-    # map_df(read_xlsx)
-    # map_df(file_path, ~read_excel(.x))
-    map_df(\(x) read_xlsx(x)) |> 
-    
+    map(read_xlsx) |> 
+    list_rbind() |> 
     # Select columns of interest
     clean_names() |> 
     select(...) |>
@@ -65,14 +55,16 @@ tweak_census <- function(path,
 }
 
 #' @export
-calc_state_totals <- function(data, group_var) {
+calc_totals <- function(data, group_var) {
   
   # box::use(dplyr[summarize])
   
-  state <- data |> 
+  data_tbl <- data |> 
     
     summarize(
       total = sum(total),
       .by = {{ group_var }}
     )
+  
+  return(data_tbl)
 }

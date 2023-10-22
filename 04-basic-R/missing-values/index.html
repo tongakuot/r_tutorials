@@ -72,10 +72,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </head>
 
-<body class="fullcontent">
+<body>
 
 <div id="quarto-content" class="page-columns page-rows-contents page-layout-article">
-
+<div id="quarto-margin-sidebar" class="sidebar margin-sidebar">
+  <nav id="TOC" role="doc-toc" class="toc-active">
+    <h2 id="toc-title">Table of contents</h2>
+   
+  <ul>
+  <li><a href="#using-coalesce-from-dplyr-to-replace-nas-with-0" id="toc-using-coalesce-from-dplyr-to-replace-nas-with-0" class="nav-link active" data-scroll-target="#using-coalesce-from-dplyr-to-replace-nas-with-0"><span class="header-section-number">1</span> Using <code>coalesce()</code> from <code>dplyr</code> to replace <code>NAs</code> with 0</a></li>
+  <li><a href="#extending-our-missing-values-example" id="toc-extending-our-missing-values-example" class="nav-link" data-scroll-target="#extending-our-missing-values-example"><span class="header-section-number">2</span> Extending our Missing Values Example</a></li>
+  </ul>
+<div class="quarto-alternate-formats"><h2>Other Formats</h2><ul><li><a href="index.pdf"><i class="bi bi-file-pdf"></i>PDF</a></li></ul></div></nav>
+</div>
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
@@ -101,19 +110,21 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 </header>
 
-<section id="using-coalesce-from-dplyr-to-replace-nas-with-0" class="level2">
-<h2 class="anchored" data-anchor-id="using-coalesce-from-dplyr-to-replace-nas-with-0">Using <code>coalesce()</code> from <code>dplyr</code> to replace <code>NAs</code> with 0</h2>
+<section id="using-coalesce-from-dplyr-to-replace-nas-with-0" class="level2" data-number="1">
+<h2 data-number="1" class="anchored" data-anchor-id="using-coalesce-from-dplyr-to-replace-nas-with-0"><span class="header-section-number">1</span> Using <code>coalesce()</code> from <code>dplyr</code> to replace <code>NAs</code> with 0</h2>
 <blockquote class="blockquote">
 <p>Some times missing values represent some fixed and known value, most commonly 0. <a href="https://r4ds.hadley.nz/missing-values" title="dplyr::coalesce()">19.2.2 Fixed values</a></p>
 </blockquote>
 <div class="cell">
+<details>
+<summary>Code</summary>
 <div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="co"># R 4 Data Science (2ed)</span></span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="co"># 19.2.2 Fixed values - using coalesce() from dplyr to replace NAs with 0</span></span>
 <span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>student_grades <span class="ot">&lt;-</span> </span>
 <span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>  </span>
 <span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">tribble</span>(</span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>student, <span class="sc">~</span>english, <span class="sc">~</span>math, <span class="sc">~</span>KiSwahili,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="sc">~</span>student, <span class="sc">~</span>english, <span class="sc">~</span>math, <span class="sc">~</span>kiswahili,</span>
 <span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="st">"deng"</span>, <span class="dv">100</span>, <span class="dv">67</span>,<span class="dv">78</span>,</span>
 <span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="st">"kuol"</span>, <span class="dv">94</span>, <span class="dv">99</span>, <span class="cn">NA</span>,</span>
 <span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>  <span class="st">"Ojuok"</span>, <span class="cn">NA</span>, <span class="dv">89</span>, <span class="dv">75</span>,</span>
@@ -131,6 +142,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb1-22"><a href="#cb1-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb1-23"><a href="#cb1-23" aria-hidden="true" tabindex="-1"></a><span class="co"># Display student final grades</span></span>
 <span id="cb1-24"><a href="#cb1-24" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(student_final_grades)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
 <div class="cell-output-display">
 <table class="table table-sm table-striped small">
 <thead>
@@ -138,7 +150,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <th style="text-align: left;">student</th>
 <th style="text-align: right;">english</th>
 <th style="text-align: right;">math</th>
-<th style="text-align: right;">KiSwahili</th>
+<th style="text-align: right;">kiswahili</th>
 </tr>
 </thead>
 <tbody>
@@ -171,6 +183,90 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">98</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">88</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</section>
+<section id="extending-our-missing-values-example" class="level2" data-number="2">
+<h2 data-number="2" class="anchored" data-anchor-id="extending-our-missing-values-example"><span class="header-section-number">2</span> Extending our Missing Values Example</h2>
+<div class="cell">
+<details>
+<summary>Code</summary>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute totals</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>final_grades_with_totals <span class="ot">&lt;-</span> </span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  student_final_grades <span class="sc">|&gt;</span> </span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rowwise</span>() <span class="sc">|&gt;</span> </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">total =</span> <span class="fu">sum</span>(<span class="fu">c_across</span>(<span class="fu">where</span>(is.numeric))),</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">letter_grade =</span> <span class="fu">case_when</span>(</span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>      total <span class="sc">/</span> <span class="dv">3</span> <span class="sc">&gt;=</span> <span class="dv">90</span> <span class="sc">~</span> <span class="st">"A"</span>,</span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>      total <span class="sc">/</span> <span class="dv">3</span> <span class="sc">&gt;=</span> <span class="dv">80</span> <span class="sc">~</span> <span class="st">"B"</span>,</span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>      total <span class="sc">/</span> <span class="dv">3</span> <span class="sc">&gt;=</span> <span class="dv">70</span> <span class="sc">~</span> <span class="st">"C"</span>,</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      total <span class="sc">/</span> <span class="dv">3</span> <span class="sc">&gt;=</span> <span class="dv">60</span> <span class="sc">~</span> <span class="st">"D"</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="cn">TRUE</span> <span class="sc">~</span> <span class="st">"F"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a><span class="co"># Display student final grades</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>knitr<span class="sc">::</span><span class="fu">kable</span>(</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>  final_grades_with_totals, <span class="at">align =</span> <span class="st">"c"</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</details>
+<div class="cell-output-display">
+<table class="table table-sm table-striped small">
+<thead>
+<tr class="header">
+<th style="text-align: center;">student</th>
+<th style="text-align: center;">english</th>
+<th style="text-align: center;">math</th>
+<th style="text-align: center;">kiswahili</th>
+<th style="text-align: center;">total</th>
+<th style="text-align: center;">letter_grade</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td style="text-align: center;">deng</td>
+<td style="text-align: center;">100</td>
+<td style="text-align: center;">67</td>
+<td style="text-align: center;">78</td>
+<td style="text-align: center;">245</td>
+<td style="text-align: center;">B</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">kuol</td>
+<td style="text-align: center;">94</td>
+<td style="text-align: center;">99</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">193</td>
+<td style="text-align: center;">D</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Ojuok</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">89</td>
+<td style="text-align: center;">75</td>
+<td style="text-align: center;">164</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="even">
+<td style="text-align: center;">Gatwich</td>
+<td style="text-align: center;">57</td>
+<td style="text-align: center;">100</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">157</td>
+<td style="text-align: center;">F</td>
+</tr>
+<tr class="odd">
+<td style="text-align: center;">Ujang</td>
+<td style="text-align: center;">98</td>
+<td style="text-align: center;">0</td>
+<td style="text-align: center;">88</td>
+<td style="text-align: center;">186</td>
+<td style="text-align: center;">D</td>
 </tr>
 </tbody>
 </table>

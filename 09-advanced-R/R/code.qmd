@@ -14,7 +14,7 @@ This tutorial demonstrates how to incorporate the box R package into your data s
 
 1.  What is box?
 
-> \'box\' allows organising R code in a more modular way, via two mechanisms:
+> 'box' allows organising R code in a more modular way, via two mechanisms:
 >
 > 1.  It enables *writing modular code* by treating files and folders of R code as independent (potentially nested) modules, without requiring the user to wrap reusable code into packages.
 >
@@ -33,10 +33,10 @@ This tutorial demonstrates how to incorporate the box R package into your data s
 # library(tidyverse)
 box::use(
   dplyr[...], 
-  purrr[map_df], 
+  purrr[...], 
   tidyr[...], 
   stringr[str_remove_all],
-  readxl[read_excel, read_xlsx]
+  readxl[read_xlsx]
 )
 
 ```
@@ -45,13 +45,16 @@ box::use(
 
 ```{r}
 # Importing the dataset
-file_path <- fs::dir_ls("../00-input/excel_files/")
+file_path <- list.files(
+  "../00-input/excel_files/", 
+  pattern = "[.]xlsx$", 
+  full.names = TRUE
+)
 
 census <- file_path |>
   
-  # map_df(read_xlsx)
-  # map_df(file_path, ~read_excel(.x))
-  map_df(\(path) read_xlsx(path)) |> 
+  map(read_xlsx) |> 
+  list_rbind() |> 
   
   # Select columns of interest
   janitor::clean_names() |> 
@@ -68,22 +71,30 @@ census <- file_path |>
   ) |> 
   
   # Transform column values
-  mutate(
-    gender = str_remove_all(gender, "Population, | \\(Number\\)")
+  # mutate(
+  #   gender = str_remove_all(gender, "Population, | \\(Number\\)")
+  # ) |> 
+  separate_wider_delim(
+    gender,
+    delim = " ",
+    names = c("other", "gender"),too_many = "drop"
   ) |> 
   
   # Remove unwanted rows
   filter(
     !(gender == "Total" | age_category == "Total")
-    # gender != "Total", age_category != "Total"
   ) |> 
   
   mutate(
     age_category = case_when(
-      str_detect(age_category, "0 to 4|5 to 9|10 to 14") ~ "0-14",
-      str_detect(age_category, "15 to 19|20 to 24|25 to 29") ~ "15-29",
-      str_detect(age_category, "30 to 34|35 to 39|40 to 44|45 to 49") ~ "30-49",
-      str_detect(age_category, "50 to 54|55 to 59|60 to 64") ~ "50-64",
+      age_category %in% c("0 to 4", "5 to 9", "10 to 14")     ~ "0-14",
+      age_category %in% c("15 to 19", "20 to 24", "25 to 29") ~ "15-29",
+      age_category %in% c("30 to 34", 
+                          "35 to 39", 
+                          "40 to 44", 
+                          "45 to 49"
+                          )                                   ~ "30-49",
+      age_category %in% c("50 to 54", "55 to 59", "60 to 64") ~ "50-64",
       TRUE ~ "65+"
     )
   ) |> 
@@ -101,31 +112,49 @@ census <- file_path |>
     # Source the function
     box::use(../R/clean)
 
-    file_path <- fs::dir_ls("../00-input/excel_files/")
-
-    # Test the function
-    df <- clean$tweak_census(
-      path = file_path, 
-      pattern = "Population, | \\(Number\\)", 
-      condition = !(gender == "Total" | age_category == "Total"),
-      group_var = c(former_region, 
-                    state, gender, 
-                    age_category),
-      c(former_region, 
-        state = region_name, 
-        gender = variable_name, 
-        age_category = age_name, 
-        population = x2008)
+    file_path <- list.files(
+      "../00-input/excel_files/", 
+      pattern = "[.]xlsx$", 
+      full.names = TRUE
     )
+
+    # Clean and trnsform the dataset
+    df <- 
+      clean$tweak_census(
+        
+        # Add files path
+        path = file_path, 
+        
+        # Pattern to remove
+        pattern = "Population, | \\(Number\\)", 
+        
+        # Rows to exclude
+        condition = !(gender == "Total" | age_category == "Total"),
+        
+        # Columns to group by
+        group_var = c(former_region, state, gender, age_category),
+        
+        # Columns of interes
+        c(former_region, 
+          state = region_name, 
+          gender = variable_name, 
+          age_category = age_name, 
+          population = x2008
+          )
+      )
     ```
 
 3.  Grouping and Summarization
 
 ```{r}
+# Compute totals by state, gender, or age category
 state <- 
-  clean$calc_state_totals(
-    df, group_var = c(state, gender)
-)
+  
+  # Calculate summaries
+  clean$calc_totals(
+    df, 
+    group_var = c(state)
+  )
 ```
 
 2.  Conclusion

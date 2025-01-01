@@ -1,0 +1,138 @@
+---
+title: "Cleaning and Transforming Customer Call Data with dplyr Package"
+author: "Alier Reng"
+date: "2024-12-29"
+format: html
+---
+
+
+```{r}
+#| warning: false
+
+# Libraries
+library(tidyverse)
+
+# Import data
+customer_raw <- readxl::read_xlsx("09-advanced-R/00-input/Customer Call List.xlsx")
+
+# Inspect output
+customer_raw
+```
+
+
+```{r}
+# Clean column names; drop unwanted column
+customer <-
+    customer_raw |>
+    janitor::clean_names() |>
+    select(-not_useful_column)
+
+# Inspect output
+customer |>
+    glimpse()
+```
+
+
+```{r}
+# Let's inspect paying_customer column
+customer |>
+    pull("paying_customer") |>
+    unique()
+```
+
+
+```{r}
+# Let's inspect do_not_contact column
+customer |>
+    pull("do_not_contact") |>
+    unique()
+```
+
+
+```{r}
+# clean and transform data
+# Prep patterns
+pattern <- "[^A-Za-z\\-\\s']"
+phone_pattern <- "[a-zA-Z\\-\\|/]"
+
+# Using case_match() method
+customer_case_match_tbl <-
+    customer |>
+    mutate(
+        across(c(paying_customer, do_not_contact), \(x) str_to_title(x)),
+        paying_customer = case_match(
+            paying_customer,
+            c("Y", "Ye") ~ "Yes",
+            "N" ~ "No",
+            .default = paying_customer
+        ),
+        do_not_contact = case_match(
+            do_not_contact,
+            c("Y", "Ye") ~ "Yes",
+            "N" ~ "No",
+            .default = do_not_contact
+        ),
+        phone_number = as.numeric(str_remove_all(phone_number, phone_pattern)),
+        last_name = str_remove_all(last_name, pattern) |> str_trim(),
+        phone_number = str_c(
+            str_sub(phone_number, 1, 3), "-",
+            str_sub(phone_number, 4, 6), "-",
+            str_sub(phone_number, 7, 10)
+        )
+    )
+
+# Inspect output
+customer_case_match_tbl
+```
+
+## Alternative method: case_when()
+
+```{r}
+# Using case_when() method
+customer_case_when_tbl <-
+    customer |>
+    mutate(
+        across(c(paying_customer, do_not_contact), \(x) str_to_title(x)),
+        paying_customer = case_when(
+            paying_customer %in% c("Y", "Ye") ~ "Yes",
+            paying_customer == "N" ~ "No",
+            .default = paying_customer
+        ),
+        do_not_contact = case_when(
+            do_not_contact %in% c("Y", "Ye") ~ "Yes",
+            do_not_contact == "N" ~ "No",
+            .default = do_not_contact
+        ),
+        phone_number = as.numeric(str_remove_all(phone_number, phone_pattern)),
+        last_name = str_remove_all(last_name, pattern) |> str_trim(),
+        phone_number = str_c(
+            str_sub(phone_number, 1, 3), "-",
+            str_sub(phone_number, 4, 6), "-",
+            str_sub(phone_number, 7, 10)
+        )
+    )
+
+# Inspect output
+customer_case_when_tbl
+```
+
+```{r}
+# Clean the address column
+clean_customer_list <-
+    customer_case_match_tbl |>
+    # Separate address column into street address, state, and zip code
+    separate_wider_delim(
+        address,
+        delim = ",",
+        names = c("street_address", "state", "zip_code"),
+        too_few = "align_start"
+    ) |>
+    mutate(state = str_trim(state))
+# Remove unwanted rows
+filter(do_not_contact != "Yes" & !is.na(phone_number)) |>
+    # Drop duplicates
+    distinct(customer_id, .keep_all = TRUE)
+
+# Inspect output
+clean_customer_list
+```

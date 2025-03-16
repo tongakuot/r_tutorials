@@ -1,0 +1,33 @@
+{
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {},
+      "source": [
+        "---\n",
+        "title: \"Visualizing My Electric Usage Over Time\"\n",
+        "author: \"Alier Reng\"\n",
+        "date: \"2025-03-02\"\n",
+        "format: html\n",
+        "---\n",
+        "\n",
+        "\n",
+        "## Trending Alier's Electric Usage \n",
+        "\n",
+        "This tutorial ilustrates how to plot timer series data with the `gplot2` library.\n",
+        "\n",
+        "## Loading Libraries\n"
+      ],
+      "id": "2b30e57f"
+    }
+  ],
+  "metadata": {
+    "kernelspec": {
+      "display_name": "Python 3",
+      "language": "python",
+      "name": "python3"
+    }
+  },
+  "nbformat": 4,
+  "nbformat_minor": 5
+}
